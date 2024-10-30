@@ -1,44 +1,55 @@
 # Check Domain on Site
 
-Checks for domains in site and contact page HTML using Selenium.
+Checks for email domains in website and contact page HTML using Selenium.
 
 ## Installation
 
-1. Install the required dependencies:
-
+1. Install required dependencies:
 ```
 pip install -r requirements.txt
 ```
 
-2. Make sure you have Chrome and ChromeDriver installed. You'll need to provide the path to ChromeDriver when running the script.
+2. Ensure Chrome and [ChromeDriver](https://developer.chrome.com/docs/chromedriver/downloads) are installed.
 
 ## Input Files
 
-1. CSV File:
-   - Contains records with `ror_id` and `extracted_domain` columns.
+CSV file must contain these columns:
+- `ror_id` (configurable ID field)
+- `website` (URL field)
+- `domains` (domain field to check)
 
 ## Usage
 
 ```
-python check_domain_on_site.py -i INPUT_CSV [-o OUTPUT_FILE] [-c CHROMEDRIVER_PATH]
+python check_domain_on_site.py -i INPUT_CSV [-o OUTPUT_FILE] [-d ID_FIELD] [-w WEBSITE_FIELD] [-f DOMAIN_FIELD] [-s SEPARATOR] [-t TIMEOUT] [-r MAX_REDIRECTS] [-v VERIFY_SSL]
 ```
 
 Arguments:
-- `-i`, `--input_file`: Required. Path to the input CSV file containing ROR IDs and domains.
-- `-o`, `--output_file`: Optional. Path for the output CSV file. Default is `domains_on_sites.csv`.
-- `-c`, `--chromedriver`: Optional. Path to the ChromeDriver executable. Default is `/opt/homebrew/bin/chromedriver`.
+- `-i`, `--input`: Required. Path to input CSV file
+- `-o`, `--output`: Output CSV path. Default: `domains_on_sites.csv`
+- `-d`, `--id`: ID field name. Default: `ror_id`
+- `-w`, `--website`: Website field name. Default: `website`
+- `-f`, `--field`: Domains field name. Default: `domains`
+- `-s`, `--sep`: Domain separator for multiple domains. Default: None
+- `-t`, `--timeout`: Request timeout in seconds. Default: 10
+- `-r`, `--redirects`: Maximum redirects. Default: 5
+- `-v`, `--verify`: Verify SSL certificates. Default: True
 
 ## Process
 
-For each record in the input CSV:
-1. Attempts to access the website using the provided domain.
-2. Checks the main page HTML for the presence of an email with the given domain.
-3. If not found on the main page, identifies potential contact pages.
-4. Checks identified contact pages for the email domain.
-5. Records whether the email domain was found on any page.
+For each record:
+1. Resolves website URL through multiple variations (https/http, www/non-www)
+2. Checks main page HTML for email domains
+3. If not found, identifies and checks contact pages
+4. Records findings in output CSV
 
 ## Output
 
-Generates a CSV file with the following columns:
-- All columns from the input CSV
-- `email_found`: Boolean indicating whether the email domain was found on the website
+Generates CSV with original columns plus:
+- `resolved_domain`: Domain that was checked
+- `resolved_url`: Final resolved URL
+- `resolution_method`: URL variation that succeeded
+- `was_redirected`: Whether URL redirected
+- `status_code`: HTTP status code
+- `email_found`: Whether email domain was found
+- `contact_page_checked`: Whether contact pages were checked

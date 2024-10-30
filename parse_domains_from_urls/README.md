@@ -1,39 +1,55 @@
-# Parse Domains from URLs
+# Check Domain on Site
 
-Extracts domains from website values in ROR records.
-
+Checks for email domains in website and contact page HTML using Selenium.
 
 ## Installation
 
-`pip install -r requirements.txt`
+1. Install required dependencies:
+```
+pip install -r requirements.txt
+```
 
+2. Ensure Chrome and ChromeDriver are installed.
 
 ## Input Files
 
-1. CSV File:
-   - Records to be parsed from data dump and have the domains extracted from the website values. Should contain a `ror_id` column.
-
-2. Data Dump:
-   - Schema v2 ROR data dump in JSON format
-
+CSV file must contain these columns:
+- `ror_id` (configurable ID field)
+- `website` (URL field)
+- `domains` (domain field to check)
 
 ## Usage
 
 ```
-python parse_domains_from_urls.py -i INPUT_CSV -d DATA_DUMP [-o OUTPUT_FILE]
+python check_domain_on_site.py -i INPUT_CSV [-o OUTPUT_FILE] [-d ID_FIELD] [-w WEBSITE_FIELD] [-f DOMAIN_FIELD] [-s SEPARATOR] [-t TIMEOUT] [-r MAX_REDIRECTS] [-v VERIFY_SSL]
 ```
 
 Arguments:
-- `-i`, `--input_file`: Required. Path to the input CSV file containing ROR IDs and domains.
-- `-d`, `--data_dump`: Required. Path to the input JSON file containing full ROR records.
-- `-o`, `--output_file`: Optional. Path for the output CSV file. Default is `parsed_domains.csv`.
+- `-i`, `--input`: Required. Path to input CSV file
+- `-o`, `--output`: Output CSV path. Default: `domains_on_sites.csv`
+- `-d`, `--id`: ID field name. Default: `ror_id`
+- `-w`, `--website`: Website field name. Default: `website`
+- `-f`, `--field`: Domains field name. Default: `domains`
+- `-s`, `--sep`: Domain separator for multiple domains. Default: None
+- `-t`, `--timeout`: Request timeout in seconds. Default: 10
+- `-r`, `--redirects`: Maximum redirects. Default: 5
+- `-v`, `--verify`: Verify SSL certificates. Default: True
 
+## Process
 
+For each record:
+1. Resolves website URL through multiple variations (https/http, www/non-www)
+2. Checks main page HTML for email domains
+3. If not found, identifies and checks contact pages
+4. Records findings in output CSV
 
 ## Output
 
-Generates a CSV file with the following columns:
-- ror_id: The ROR ID of the organization
-- website: The full website URL extracted from the ROR record
-- extracted_domain: The domain name extracted from the website URL
-
+Generates CSV with original columns plus:
+- `resolved_domain`: Domain that was checked
+- `resolved_url`: Final resolved URL
+- `resolution_method`: URL variation that succeeded
+- `was_redirected`: Whether URL redirected
+- `status_code`: HTTP status code
+- `email_found`: Whether email domain was found
+- `contact_page_checked`: Whether contact pages were checked
