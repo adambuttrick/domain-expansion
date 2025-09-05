@@ -1,10 +1,8 @@
 # Check Domain on Site
 
-Checks for email domains in website and contact page HTML using Selenium.
+Checks for email domains in website and contact page HTML using asyncio with Selenium as a fallback.
 
 ## Installation
-
-1. Install required dependencies:
 ```
 pip install -r requirements.txt
 ```
